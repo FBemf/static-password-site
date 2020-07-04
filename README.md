@@ -4,4 +4,6 @@ This is a static website which is password-protected.
 
 The default password is `qwer1234`.
 
-To create a new password-protected directory under the password `password`, run `mkdir $(./make_password.sh "password")`.
+If you modify `hidden.html`, rebuild the page by running `./encrypt.js hidden.html site/hidden.html.encrypted PASSWORD`, where `PASSWORD` is your password.
+
+There's an older version of this site in the branch `original` which was url-based.

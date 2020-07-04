@@ -4,23 +4,40 @@
     <meta charset="UTF-8">
     <script src="./sjcl.js" type="text/javascript"></script>
     <script type="text/javascript">
-      hash = function (plaintext) {
-        let out = sjcl.hash.sha256.hash(plaintext);
-        let result = sjcl.codec.hex.fromBits(out);
-        return result;
-      }
+      const hiddenPage = "hidden.html";
       window.onload = function () {
+        let before = document.getElementById("before");
+        let after = document.getElementById("after");
+        let incorrect = document.getElementById("incorrect");
         let passwordBox = document.getElementById("password");
         let submitButton = document.getElementById("submit");
+
+        after.style.display = "none";
+
         passwordBox.addEventListener("keyup", (event) => {
           if (event.keyCode === 13) {
             event.preventDefault();
             submitButton.click();
           }
         });
-        submitButton.addEventListener("click", (event) => {
+
+        submitButton.addEventListener("click", async (event) => {
           event.preventDefault();
-          window.location.assign(hash(passwordBox.value));
+          let password = passwordBox.value;
+          await fetch(hiddenPage + ".encrypted")
+            .then(response => response.text())
+            .then(data => {
+              try {
+                let decrypted = sjcl.decrypt(
+                  password,
+                  data);
+                after.innerHTML = decrypted;
+                before.style.display = "none";
+                after.style.display = "";
+              } catch (e) {
+                incorrect.innerText = " [Incorrect] ";
+              }
+            });
         });
       }
     </script>
@@ -39,9 +56,13 @@
     </style>
   </head>
   <body>
-    <h1>Access Restricted</h1>
-    <p>Please enter the password below.</p>
-    <input type="password" id="password">
-    <button id="submit">Submit</button>
+    <div id="before">
+      <h1>Access Restricted</h1>
+      <p>Please enter the password below.</p>
+      <input type="password" id="password">
+      <button id="submit">Submit</button>
+      <span id="incorrect"></span>
+    </div>
+    <div id="after"></div>
   </body>
 </html>
