@@ -1,10 +1,12 @@
 const hiddenPage = "hidden.html";
-window.onload = function () {
+document.addEventListener("DOMContentLoaded", () => {
   let before = document.getElementById("before");
   let after = document.getElementById("after");
   let incorrect = document.getElementById("incorrect");
   let passwordBox = document.getElementById("password");
   let submitButton = document.getElementById("submit");
+  let encrypted = fetch(hiddenPage + ".encrypted")
+    .then(response => response.text());
 
   after.style.display = "none";
 
@@ -15,23 +17,21 @@ window.onload = function () {
     }
   });
 
-  submitButton.addEventListener("click", async (event) => {
+  submitButton.addEventListener("click", event => {
     event.preventDefault();
     let password = passwordBox.value;
-    await fetch(hiddenPage + ".encrypted")
-      .then(response => response.text())
-      .then(data => {
-        try {
-          let decrypted = sjcl.decrypt(
-            password,
-            data);
-          after.innerHTML = decrypted;
-          before.style.display = "none";
-          after.style.display = "";
-        } catch (e) {
-          incorrect.innerText = " [Incorrect] ";
-        }
-      });
+    encrypted.then(data => {
+      try {
+        let decrypted = sjcl.decrypt(
+          password,
+          data);
+        after.innerHTML = decrypted;
+        before.style.display = "none";
+        after.style.display = "";
+      } catch (e) {
+        incorrect.innerText = " [Incorrect] ";
+      }
+      passwordBox.value = "";
+    });
   });
-}
-
+});
